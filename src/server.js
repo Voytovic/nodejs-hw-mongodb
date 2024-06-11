@@ -1,24 +1,17 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import contactsRouter from './routers/contacts.js';
-import { errorHandler } from './middlewares/errorHandler.js';
-import { notFoundHandler } from './middlewares/notFoundHandler.js';
-
 import { env } from './utils/env.js';
+import contactsRouter from './routers/contacts.js';
+import createHttpError from 'http-errors';
 
-const PORT = Number(env('PORT', '3000'));
+const PORT = env('PORT', 3000);
 
 export const setupServer = () => {
   const app = express();
 
-  app.use(
-    express.json({
-      type: ['application/json', 'application/vnd.api+json'],
-    }),
-  );
+  app.use(express.json());
   app.use(cors());
-
   app.use(
     pino({
       transport: {
@@ -27,11 +20,19 @@ export const setupServer = () => {
     }),
   );
 
-  app.use(contactsRouter);
+  app.use('/api', contactsRouter);
 
-  app.use('*', notFoundHandler);
+  app.use((req, res, next) => {
+    next(createHttpError(404, 'Route not found'));
+  });
 
-  app.use(errorHandler);
+  app.use((err, req, res, next) => {
+    res.status(err.status || 500).json({
+      status: 'error',
+      message: err.message || 'Something went wrong',
+      data: err.data || null,
+    });
+  });
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
