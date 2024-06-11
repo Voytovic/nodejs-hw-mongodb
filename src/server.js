@@ -20,7 +20,7 @@ export const setupServer = () => {
     }),
   );
 
-  app.use('/api', contactsRouter);
+  app.use('/', contactsRouter);
 
   app.use((req, res, next) => {
     next(createHttpError(404, 'Route not found'));
