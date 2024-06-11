@@ -1,25 +1,26 @@
 import {
   getAllContacts,
-  getContactsById,
-  createContacts,
+  getContactById,
+  createContact,
   deleteContact,
   updateContact,
 } from '../services/contacts.js';
+import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 
-export const getContactsController = async (req, res) => {
+export const getAllContactsController = async (req, res, next) => {
   const contacts = await getAllContacts();
 
-  res.json({
+  res.status(200).json({
     status: 200,
     message: 'Successfully found contacts!',
     data: contacts,
   });
 };
 
-export const getContactsByIdController = async (req, res, next) => {
+export const getContactByIdController = async (req, res, next) => {
   const { contactId } = req.params;
-  const contact = await getContactsById(contactId);
+  const contact = await getContactById(contactId);
 
   if (!contact) {
     next(createHttpError(404, 'Contact not found'));
@@ -33,23 +34,13 @@ export const getContactsByIdController = async (req, res, next) => {
   });
 };
 
-export const createContactController = async (req, res, next) => {
-  const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+export const createContactController = async (req, res) => {
+  const contact = await createContact(req.body);
 
-  if (!name || !phoneNumber) {
-    next(createHttpError(400, 'Name and phoneNumber are required'));
-  }
-  const newContact = await createContacts({
-    name,
-    phoneNumber,
-    email,
-    isFavourite,
-    contactType,
-  });
   res.status(201).json({
     status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
+    message: `Successfully created a contact!`,
+    data: contact,
   });
 };
 
@@ -62,10 +53,11 @@ export const deleteContactController = async (req, res, next) => {
     next(createHttpError(404, 'Contact not found'));
     return;
   }
-  res.status(204).json({ message: 'Delete success' }).send();
+
+  res.status(204).send();
 };
 
-export const updateContactController = async (req, res, next) => {
+export const upsertContactController = async (req, res, next) => {
   const { contactId } = req.params;
 
   const result = await updateContact(contactId, req.body, {
