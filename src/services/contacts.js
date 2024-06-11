@@ -5,23 +5,39 @@ export const getAllContacts = async () => {
   return contacts;
 };
 
-export const getContactsById = async (contactId) => {
+export const getContactById = async (contactId) => {
   const contact = await ContactsCollection.findById(contactId);
   return contact;
 };
 
-export const createContacts = async (contactData) => {
-  const contact = new ContactsCollection(contactData);
-  return await contact.save();
-};
-
-export const updateContact = async (contactId, updateData, options = {}) => {
-  return await ContactsCollection.findByIdAndUpdate(contactId, updateData, {
-    new: true,
-    ...options,
-  });
+export const createContact = async (payload) => {
+  const contact = await ContactsCollection.create(payload);
+  return contact;
 };
 
 export const deleteContact = async (contactId) => {
-  return await ContactsCollection.findByIdAndDelete(contactId);
+  const contact = await ContactsCollection.findOneAndDelete({
+    _id: contactId,
+  });
+
+  return contact;
+};
+
+export const updateContact = async (contactId, payload, options = {}) => {
+  const rawResult = await ContactsCollection.findOneAndUpdate(
+    { _id: contactId },
+    payload,
+    {
+      new: true,
+      includeResultMetadata: true,
+      ...options,
+    },
+  );
+
+  if (!rawResult || !rawResult.value) return null;
+
+  return {
+    contact: rawResult.value,
+    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+  };
 };
