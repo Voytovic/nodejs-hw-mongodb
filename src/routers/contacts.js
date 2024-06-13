@@ -10,7 +10,7 @@ import {
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import {
-  creaContactSchema,
+  createContactSchema,
   updateContactSchema,
 } from '../validation/contacts.js';
 
@@ -26,7 +26,7 @@ router.delete('/contacts/:contactId', ctrlWrapper(deleteContactController));
 
 router.put(
   '/contacts/:contactId',
-  validateBody(creaContactSchema),
+  validateBody(createContactSchema),
   ctrlWrapper(updateContactController),
 );
 
