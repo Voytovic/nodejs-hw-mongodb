@@ -1,12 +1,14 @@
 import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
-import { env } from './utils/env.js';
+import cookieParser from 'cookie-parser';
+import router from './routers/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import contactsRouter from './routers/contacts.js';
 
-const PORT = env.PORT || 3000;
+import { env } from './utils/env.js';
+
+const PORT = Number(env('PORT', '3000'));
 
 export const setupServer = () => {
   const app = express();
@@ -14,10 +16,8 @@ export const setupServer = () => {
   app.use(
     express.json({
       type: ['application/json', 'application/vnd.api+json'],
-      limit: '100kb',
     }),
   );
-
   app.use(cors());
 
   app.use(
@@ -28,7 +28,9 @@ export const setupServer = () => {
     }),
   );
 
-  app.use(contactsRouter);
+  app.use(cookieParser());
+
+  app.use(router);
 
   app.use('*', notFoundHandler);
 
