@@ -12,9 +12,9 @@ export const getAllContacts = async ({
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const contactsQuery = ContactsCollection.find({ userId });
+  const contactsQuery = ContactsCollection.find({ userId }); // Зміна: фільтрація за userId
 
-  const contactsCount = await ContactsCollection.find({ userId })
+  const contactsCount = await ContactsCollection.find({ userId }) // Зміна: фільтрація за userId
     .merge(contactsQuery)
     .countDocuments();
 
@@ -33,12 +33,15 @@ export const getAllContacts = async ({
 };
 
 export const getContactById = async (contactId, userId) => {
-  const contact = await ContactsCollection.findOne({ _id: contactId, userId });
+  const contact = await ContactsCollection.findOne({ _id: contactId, userId }); // Зміна: фільтрація за userId
   return contact;
 };
 
-export const createContact = async (payload) => {
-  const contact = await ContactsCollection.create(payload);
+export const createContact = async (payload, userId) => {
+  const contact = await ContactsCollection.create({
+    userId,
+    ...payload,
+  });
   return contact;
 };
 
